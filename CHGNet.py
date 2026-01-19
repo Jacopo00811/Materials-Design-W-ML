@@ -40,13 +40,18 @@ def load_structures():
                 s = Structure.from_dict(s)
             if not isinstance(s, Structure):
                 raise TypeError(f"Unsupported type: {type(s)}")
-            _ = s.composition  # validate
+            # Deeper validation to catch recursion issues early
+            comp = s.composition
+            _ = comp.formula  # force evaluation
+            _ = len(s.sites)  # validate sites
             structures.append(s)
+        except RecursionError:
+            failed.append((i, "RecursionError"))
         except Exception as e:
             failed.append((i, type(e).__name__))
     
     if failed:
-        print(f"Skipped {len(failed)} invalid structures")
+        print(f"Skipped {len(failed)} invalid structures: {failed[:5]}...")
     
     return structures
 
