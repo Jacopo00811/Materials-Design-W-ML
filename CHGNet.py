@@ -6,6 +6,9 @@ from chgnet.trainer import Trainer
 from chgnet.data.dataset import StructureData, get_train_val_test_loader
 import wandb
 from pymatgen.core import Structure
+import sys
+from chgnet.graph import CrystalGraphConverter
+
 
 
 STRUCT_PKL = "processed_structures_CHGNet/train_structures.pkl"
@@ -32,6 +35,13 @@ def load_structures():
     with open(STRUCT_PKL, "rb") as f:
         raw_structs = pickle.load(f)
     
+    # Increase recursion limit temporarily for validation
+    old_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(5000)
+    
+    # Create graph converter to test structures like CHGNet will
+    converter = CrystalGraphConverter()
+    
     structures = []
     failed = []
     for i, s in enumerate(raw_structs):
@@ -40,19 +50,29 @@ def load_structures():
                 s = Structure.from_dict(s)
             if not isinstance(s, Structure):
                 raise TypeError(f"Unsupported type: {type(s)}")
-            # Deeper validation to catch recursion issues early
+            
+            # Deep validation
             comp = s.composition
-            _ = comp.formula  # force evaluation
-            _ = len(s.sites)  # validate sites
+            _ = comp.formula
+            _ = str(comp)  # Additional check
+            _ = len(s.sites)
+            
+            # Test graph conversion (what CHGNet actually does)
+            _ = converter(s)
+            
             structures.append(s)
         except RecursionError:
             failed.append((i, "RecursionError"))
         except Exception as e:
-            failed.append((i, type(e).__name__))
+            failed.append((i, f"{type(e).__name__}: {str(e)[:50]}"))
+    
+    sys.setrecursionlimit(old_limit)
     
     if failed:
-        print(f"Skipped {len(failed)} invalid structures: {failed[:5]}...")
+        print(f"Skipped {len(failed)} invalid structures.")
+        print(f"First 10 failures: {failed[:10]}")
     
+    print(f"Successfully validated {len(structures)} structures")
     return structures
 
 def get_energies(structures):
@@ -69,10 +89,17 @@ def train_with_config(config=None):
     structures = load_structures()
     energies = get_energies(structures)
     
+    # Create placeholder forces/stresses (zeros) for each structure
+    # CHGNet requires these even when training on energy only
+    forces = [[[0.0, 0.0, 0.0] for _ in s.sites] for s in structures]
+    stresses = [[0.0] * 6 for _ in structures]  # Voigt notation: 6 components
+    
     dataset = StructureData(
         structures=structures, 
         energies=energies, 
-        forces=None, stresses=None, magmoms=None
+        forces=forces,
+        stresses=stresses,
+        magmoms=None
     )
 
     # 2. DATA LOADERS
