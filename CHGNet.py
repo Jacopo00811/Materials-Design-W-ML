@@ -101,7 +101,6 @@ def train_with_config(config=None):
         learning_rate=config['learning_rate'],
         use_device=device,
         print_freq=10,
-        use_wandb=True, 
         wandb_path=f"CHGNet-finetuning/{run_name}" 
     )
     
