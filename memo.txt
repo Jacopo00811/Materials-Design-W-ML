@@ -1,8 +1,0 @@
-Why this is needed:
-
-Some 2D material databases store structures with zero or negligible vacuum spacing
-CHGNet and pymatgen expect 3D periodic cells with non-degenerate lattice vectors
-A c-axis of nearly zero would create a singular (non-invertible) lattice matrix, causing errors
-Example:
-
-This is a common preprocessing step for 2D materials to make them compatible with 3D-periodic software tools. The 20 Å spacing prevents interlayer interactions in the periodic image
