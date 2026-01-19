@@ -150,9 +150,13 @@ if __name__ == "__main__":
 
     # Define hyperparameter grid manually
     configs = [
-        {"batch_size": 8, "learning_rate": 1e-3, "epochs": 50, "freeze_embeddings": False, "optimizer": "Adam", "scheduler": "CosLR"},
-        {"batch_size": 16, "learning_rate": 5e-4, "epochs": 50, "freeze_embeddings": True, "optimizer": "AdamW", "scheduler": "StepLR"},
-        {"batch_size": 32, "learning_rate": 1e-4, "epochs": 50, "freeze_embeddings": False, "optimizer": "Adam", "scheduler": "CosLR"},
+        {"batch_size": 8, "learning_rate": 1e-3, "epochs": 5, "freeze_embeddings": False, "optimizer": "Adam", "scheduler": "CosLR"},
+        {"batch_size": 16, "learning_rate": 5e-4, "epochs": 5, "freeze_embeddings": True, "optimizer": "AdamW", "scheduler": "StepLR"},
+        {"batch_size": 32, "learning_rate": 1e-4, "epochs": 5, "freeze_embeddings": False, "optimizer": "Adam", "scheduler": "CosLR"},
+        {"batch_size": 16, "learning_rate": 2e-3, "epochs": 5, "freeze_embeddings": True, "optimizer": "AdamW", "scheduler": "CosLR"},
+        {"batch_size": 8, "learning_rate": 1e-2, "epochs": 5, "freeze_embeddings": False, "optimizer": "Adam", "scheduler": "StepLR"},
+        {"batch_size": 32, "learning_rate": 5e-3, "epochs": 5, "freeze_embeddings": True, "optimizer": "AdamW", "scheduler": "StepLR"},
+
     ]
     
     for config in configs:
